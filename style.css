@@ -16,7 +16,10 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+}
 
 body {
   background: var(--bg);
@@ -29,8 +32,10 @@ body {
 /* ---------- nav ---------- */
 
 .nav {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  width: 100%;
   z-index: 10;
   display: flex;
   align-items: center;
@@ -81,13 +86,31 @@ body {
 
 .nav-cta:hover { background: var(--accent); color: var(--bg) !important; }
 
+/* ---------- snap sections ---------- */
+
+/* Every top-level screen: fills the viewport and snaps to it. */
+.snap {
+  min-height: 100vh;
+  min-height: 100svh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Short viewports (landscape phones, small laptops): content won't fit
+   one screen per section, so snapping fights the user — turn it off. */
+@media (max-height: 620px) {
+  html { scroll-snap-type: none; }
+}
+
 /* ---------- hero ---------- */
 
 .hero {
-  max-width: 56rem;
-  margin: 0 auto;
-  padding: clamp(3rem, 8vh, 6rem) 1.5rem 3.5rem;
+  align-items: center;
   text-align: center;
+  padding: 6rem 1.5rem 0;
 }
 
 .hero-banner {
@@ -155,7 +178,7 @@ body {
 
 .btn-big { font-size: 1rem; padding: 0.9rem 2rem; }
 
-/* ---------- trust strip ---------- */
+/* ---------- trust strip (bottom of hero screen) ---------- */
 
 .trust-strip {
   display: flex;
@@ -166,9 +189,12 @@ body {
   font-size: 0.72rem;
   letter-spacing: 0.14em;
   padding: 0.9rem 1.5rem;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  border: 1px solid var(--line);
+  border-radius: 6px;
   background: var(--bg-raised);
+  width: min(100%, 64rem);
+  margin-top: auto;
+  margin-bottom: 1.5rem;
 }
 
 .trust-strip span:first-child { color: var(--sage); }
@@ -177,9 +203,10 @@ body {
 /* ---------- sections ---------- */
 
 .section {
-  max-width: 64rem;
-  margin: 0 auto;
-  padding: clamp(3.5rem, 9vh, 6rem) 1.5rem 0;
+  /* side padding centers a 64rem column while the section itself
+     stays full-bleed for the snap viewport and divider line */
+  padding: 5.5rem max(1.5rem, calc(50vw - 32rem)) 2.5rem;
+  border-top: 1px solid var(--line);
 }
 
 .kicker {
@@ -236,7 +263,15 @@ body {
 
 /* ---------- tiers ---------- */
 
-.tier { display: flex; flex-direction: column; gap: 0.6rem; }
+/* Compact: the three tiers + heading must fit one snap screen */
+.card-grid.tiers { margin-top: 1.5rem; }
+
+.tier {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.1rem 1.25rem;
+}
 
 .tier.featured { border-color: var(--accent-dim); position: relative; }
 
@@ -249,7 +284,7 @@ body {
 
 .tier.featured .tier-label { color: var(--accent); }
 
-.tier h3 { font-size: 1.5rem; }
+.tier h3 { font-size: 1.3rem; }
 
 .tier-spec {
   font-family: var(--mono);
@@ -261,10 +296,22 @@ body {
 
 .tier ul { list-style: none; margin-top: auto; }
 
+/* Align rows (label / name / spec / description / bullets) across all
+   three tier cards so the first bullet starts at the same height. */
+@supports (grid-template-rows: subgrid) {
+  .tier {
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: span 5;
+    gap: 0.5rem;
+  }
+  .tier ul { margin-top: 0; }
+}
+
 .tier li {
   color: var(--muted);
-  font-size: 0.88rem;
-  padding: 0.3rem 0 0.3rem 1.2rem;
+  font-size: 0.85rem;
+  padding: 0.2rem 0 0.2rem 1.2rem;
   position: relative;
 }
 
@@ -339,7 +386,8 @@ body {
 
 .contact {
   text-align: center;
-  padding-bottom: clamp(3.5rem, 9vh, 6rem);
+  align-items: center;
+  padding-bottom: 0;
 }
 
 .contact-mark {
@@ -347,6 +395,7 @@ body {
   height: auto;
   color: var(--accent);
   opacity: 0.9;
+  margin-top: auto; /* pairs with the footer's auto margin to center the content block */
 }
 
 .contact h2, .contact .section-intro { margin-left: auto; margin-right: auto; }
@@ -360,7 +409,9 @@ body {
   flex-wrap: wrap;
   gap: 0.5rem 2rem;
   justify-content: space-between;
-  padding: 1.25rem clamp(1rem, 4vw, 3rem);
+  width: 100%;
+  margin-top: auto;
+  padding: 1.25rem 0;
   border-top: 1px solid var(--line);
   font-family: var(--mono);
   font-size: 0.72rem;
@@ -392,4 +443,5 @@ body {
 @media (max-width: 600px) {
   .nav { flex-direction: column; gap: 0.5rem; }
   .nav-links { flex-wrap: wrap; justify-content: center; }
+  .hero, .section { padding-top: 8rem; } /* clear the taller stacked nav */
 }
